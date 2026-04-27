@@ -191,7 +191,7 @@ img{display:block;max-width:100%}
 
 <!-- ── TELA INICIAL ── -->
 <div id="startScreen">
-   <div class="start-icon"><img src=https://scontent-nrt1-2.xx.fbcdn.net/v/t39.30808-1/518386161_24229495946646868_806288746778674754_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=101&ccb=1-7&_nc_sid=1d2534&_nc_ohc=HLX3AqwFQpYQ7kNvwEDe357&_nc_oc=AdpyhrMZ82H9SSoMPplQMQahOhZS2ju0jepfzyrkmuAippRMdUwCNnXelV2e_pnW3c8d_TxUvrpWlDC1SeNmMO_F&_nc_zt=24&_nc_ht=scontent-nrt1-2.xx&_nc_gid=ZUxdvsFBSFGUdU91PFqPSQ&_nc_ss=7b289&oh=00_Af01zsOvf65jthEpvMJdXMf7dnENIzKetcGlM1RxVige_Q&oe=69F501AA></img></div>
+  <div class="start-icon"><img src=https://scontent-nrt1-2.xx.fbcdn.net/v/t39.30808-1/518386161_24229495946646868_806288746778674754_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=101&ccb=1-7&_nc_sid=1d2534&_nc_ohc=HLX3AqwFQpYQ7kNvwEDe357&_nc_oc=AdpyhrMZ82H9SSoMPplQMQahOhZS2ju0jepfzyrkmuAippRMdUwCNnXelV2e_pnW3c8d_TxUvrpWlDC1SeNmMO_F&_nc_zt=24&_nc_ht=scontent-nrt1-2.xx&_nc_gid=ZUxdvsFBSFGUdU91PFqPSQ&_nc_ss=7b289&oh=00_Af01zsOvf65jthEpvMJdXMf7dnENIzKetcGlM1RxVige_Q&oe=69F501AA></img></div>
   <h1>Simulado Preparatório<br>para Karimen</h1>
   <p>Banco completo com questões dos 3 simulados da Auto Escola Suzano — 50 perguntas aleatórias a cada rodada.</p>
   <div class="start-cards">
@@ -210,6 +210,7 @@ img{display:block;max-width:100%}
       <span class="score-chip blue">📋 <span id="hTotal">0</span>/50</span>
       <span class="score-chip green">✓ <span id="hCorrect">0</span></span>
       <span class="score-chip red">✗ <span id="hWrong">0</span></span>
+      <span class="score-chip blue">⏱ <span id="timer">30:00</span></span>
     </div>
   </div>
   <div class="prog-wrap">
@@ -387,7 +388,7 @@ function shuffle(arr){
 }
 
 function startQuiz(){
-  session = shuffle(ALL_QUESTIONS).slice(0,50);
+  session = shuffle(ALL_QUESTIONS).slice(0,50).map(q => ({...q, _done:false}));
   answered=0; correct=0; wrong=0;
 
   document.getElementById('startScreen').style.display='none';
@@ -397,6 +398,7 @@ function startQuiz(){
 
   updateHeader();
   renderCards();
+  startTimer();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -442,7 +444,8 @@ function renderCards(){
 
 function answer(idx, chosen){
   const q = session[idx];
-  if(!q || q._done) return;
+  if(!q){ console.log('Questão inválida:', idx); return; }
+  if(q._done === true) return;
   q._done = true;
 
   const isCorrect = (chosen === q.a);
@@ -475,6 +478,7 @@ function answer(idx, chosen){
 }
 
 function showFinal(){
+  clearInterval(timerInterval);
   document.getElementById('quizHeader').style.display='none';
   document.getElementById('quizArea').style.display='none';
   document.getElementById('finalScreen').style.display='block';
@@ -512,6 +516,35 @@ function showFinal(){
 
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// ===== TIMER =====
+let timeLeft = 1800;
+let timerInterval;
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft = 1800;
+  const timerEl = document.getElementById("timer");
+  timerEl.style.color = "#5b8df6";
+
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    let m=Math.floor(timeLeft/60);
+    let s=timeLeft%60;
+    timerEl.textContent = m + ":" + (s<10 ? "0"+s : s);
+
+    if(timeLeft <= 300){
+      timerEl.style.color = "#ef4444";
+    }
+
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      alert("⏱ Tempo esgotado!");
+      showFinal();
+    }
+  },1000);
+}
+
 </script>
 </body>
 </html>
